@@ -1,0 +1,205 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+
+const Home = ({ posts }) => {
+  const navigate = useNavigate();
+
+  // posts가 배열인지 확인하고, 아니면 빈 배열로 설정
+  const postsArray = Array.isArray(posts) ? posts : [];
+  const recentPosts = postsArray.slice(0, 5);
+
+  const categoryMap = {
+    physics: '물리',
+    chemistry: '화학',
+    biology: '생물',
+    earth: '지구과학',
+    math: '수학',
+  };
+
+  return (
+    <HomeContainer>
+      <HeroSection>
+        <h1>수학과학 동아리 포럼</h1>
+        <p>수학과 과학에 대한 다양한 주제를 나누고 토론하는 공간입니다.</p>
+        <TutorialButton onClick={() => navigate('/tutorial')}>
+          🎓 튜토리얼 보기
+        </TutorialButton>
+      </HeroSection>
+
+      <Section>
+        <h2>최근 게시글</h2>
+        <PostList>
+          {recentPosts.map(post => (
+            <PostItem key={post.id || post._id} onClick={() => navigate(`/post/${post.id || post._id}`)}>
+              <PostHeader>
+                <CategoryTag>{categoryMap[post.category] || post.category}</CategoryTag>
+                <Title>{post.title}</Title>
+              </PostHeader>
+              <PostContent>
+                <p>{(post.content || '').substring(0, 100)}...</p>
+              </PostContent>
+              <PostMeta>
+                <span>작성자: {post.author}</span>
+                <span>좋아요: {post.likes}</span>
+                <span>댓글: {(post.comments || []).length}</span>
+              </PostMeta>
+            </PostItem>
+          ))}
+        </PostList>
+      </Section>
+
+      <Section>
+        <h2>카테고리</h2>
+        <CategoryGrid>
+          <CategoryCard onClick={() => navigate('/board?category=physics')}>
+            <h3>물리</h3>
+          </CategoryCard>
+          <CategoryCard onClick={() => navigate('/board?category=chemistry')}>
+            <h3>화학</h3>
+          </CategoryCard>
+          <CategoryCard onClick={() => navigate('/board?category=biology')}>
+            <h3>생물</h3>
+          </CategoryCard>
+          <CategoryCard onClick={() => navigate('/board?category=earth')}>
+            <h3>지구과학</h3>
+          </CategoryCard>
+          <CategoryCard onClick={() => navigate('/board?category=math')}>
+            <h3>수학</h3>
+          </CategoryCard>
+        </CategoryGrid>
+      </Section>
+    </HomeContainer>
+  );
+};
+
+const HomeContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+`;
+
+const HeroSection = styled.section`
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+  h1 {
+    font-size: 2.5rem;
+    color: #1976d2;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.2rem;
+    color: #666;
+  }
+`;
+
+const Section = styled.section`
+  h2 {
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+`;
+
+const PostList = styled.div`
+  display: grid;
+  gap: 1.5rem;
+`;
+
+const PostItem = styled.article`
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+`;
+
+const PostHeader = styled.header`
+  margin-bottom: 1rem;
+`;
+
+const CategoryTag = styled.span`
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+`;
+
+const Title = styled.h3`
+  color: #333;
+  margin-bottom: 0.5rem;
+`;
+
+const PostContent = styled.div`
+  color: #666;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+`;
+
+const PostMeta = styled.div`
+  display: flex;
+  gap: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+`;
+
+const CategoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+`;
+
+const CategoryCard = styled.div`
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  h3 {
+    color: #1976d2;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: #666;
+  }
+`;
+
+const TutorialButton = styled.button`
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 2rem;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+`;
+
+export default Home; 
