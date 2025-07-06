@@ -90,7 +90,7 @@ function Login({ setUserId, setIsAdmin }) {
               setIsUserWithPassword(false);
             }
           }}
-          placeholder="아이디를 입력하세요 (예: 25-30823)"
+          placeholder="아이디를 입력하세요 (형식은 자유입니다)"
         />
         {(isAdminLogin || isUserWithPassword) && (
           <Input
