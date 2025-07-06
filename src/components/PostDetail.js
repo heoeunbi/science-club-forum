@@ -13,6 +13,11 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedContent, setEditedContent] = useState('');
+  const [editedCategory, setEditedCategory] = useState('');
+  const [editedIsAnonymous, setEditedIsAnonymous] = useState(true);
+  const [editedAuthor, setEditedAuthor] = useState('');
+  const [editedFile, setEditedFile] = useState(null);
+  const [editedMediaType, setEditedMediaType] = useState('');
   const [showImagePreview, setShowImagePreview] = useState(false);
 
   // posts가 배열인지 확인하고, 아니면 빈 배열로 설정
@@ -35,16 +40,60 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
   const handleEdit = () => {
     setEditedTitle(post.title);
     setEditedContent(post.content);
+    setEditedCategory(post.category);
+    setEditedIsAnonymous(post.author === '익명');
+    setEditedAuthor(post.author === '익명' ? '' : post.author);
+    setEditedFile(null);
+    setEditedMediaType(post.mediaType || 'none');
     setIsEditing(true);
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      // 파일 크기 검사 (10MB)
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        alert('파일 크기는 최대 10MB까지 가능합니다.');
+        e.target.value = '';
+        return;
+      }
+
+      // 파일 타입 검사
+      if (!selectedFile.type.startsWith('image/') && !selectedFile.type.startsWith('video/')) {
+        alert('이미지 또는 비디오 파일만 업로드 가능합니다.');
+        e.target.value = '';
+        return;
+      }
+
+      setEditedFile(selectedFile);
+      setEditedMediaType(selectedFile.type.startsWith('video/') ? 'video' : 'image');
+    }
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      await onEdit(post.id || post._id, {
+      let mediaUrl = post.mediaUrl; // 기존 파일 URL 유지
+      let mediaType = post.mediaType || 'none';
+
+      // 새 파일이 선택된 경우 Firebase Storage에 업로드
+      if (editedFile) {
+        const { fileService } = await import('../services/firebaseService');
+        const fileName = `${Date.now()}-${editedFile.name}`;
+        mediaUrl = await fileService.uploadImage(editedFile, fileName);
+        mediaType = editedMediaType;
+      }
+
+      const updateData = {
         title: editedTitle,
-        content: editedContent
-      });
+        content: editedContent,
+        category: editedCategory,
+        author: editedIsAnonymous ? '익명' : editedAuthor,
+        mediaUrl,
+        mediaType
+      };
+
+      await onEdit(post.id || post._id, updateData);
       setIsEditing(false);
     } catch (error) {
       console.error('Error editing post:', error);
@@ -220,19 +269,100 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
     <DetailContainer>
       {isEditing ? (
         <EditForm onSubmit={handleEditSubmit}>
-          <Input
-            type="text"
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            placeholder="제목"
-            required
-          />
-          <TextArea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            placeholder="내용"
-            required
-          />
+          <FormGroup>
+            <Label>제목 *</Label>
+            <Input
+              type="text"
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              placeholder="제목"
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label>카테고리 *</Label>
+            <Select 
+              value={editedCategory} 
+              onChange={(e) => setEditedCategory(e.target.value)}
+              required
+            >
+              <option value="">카테고리 선택</option>
+              <option value="notice">공지</option>
+              <option value="intro">0. 탐구입문</option>
+              <option value="design">1. 탐구 설계・자료 추천</option>
+              <option value="trial">2. 연구 중 시행착오 나눔</option>
+              <option value="result">3. 이상한 결과・결론 도출 질문</option>
+              <option value="feedback">4. 탐구 피드백・보완 제안</option>
+              <option value="humanities">5. 인문 계열 지식 토론</option>
+              <option value="science">6. 자연 계열 지식 토론</option>
+              <option value="fusion">7. 융합형 토론・모델 제안</option>
+            </Select>
+          </FormGroup>
+
+          <FormGroup>
+            <Label>내용 *</Label>
+            <TextArea
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              placeholder="내용"
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label>작성자</Label>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <label>
+                <input 
+                  type="radio" 
+                  checked={editedIsAnonymous} 
+                  onChange={() => setEditedIsAnonymous(true)} 
+                /> 익명
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input 
+                  type="radio" 
+                  checked={!editedIsAnonymous} 
+                  onChange={() => setEditedIsAnonymous(false)} 
+                /> 이름
+                <input
+                  type="text"
+                  value={editedAuthor}
+                  onChange={e => setEditedAuthor(e.target.value)}
+                  placeholder="이름 입력"
+                  disabled={editedIsAnonymous}
+                  style={{ width: 120, padding: '0.3rem', borderRadius: 4, border: '1px solid #ccc' }}
+                />
+              </label>
+            </div>
+          </FormGroup>
+
+          <FormGroup>
+            <Label>파일 첨부</Label>
+            <Input
+              type="file"
+              accept="image/*,video/*"
+              onChange={handleFileChange}
+              style={{ 
+                fontSize: '16px',
+                padding: '8px',
+                border: '1px solid #ddd',
+                borderRadius: '4px'
+              }}
+            />
+            {editedFile && (
+              <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+                새 파일: {editedFile.name} ({(editedFile.size / (1024 * 1024)).toFixed(2)}MB)
+              </div>
+            )}
+            {post.mediaUrl && !editedFile && (
+              <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+                현재 파일: {post.mediaType === 'image' ? '이미지' : '비디오'} (변경하지 않으면 유지)
+              </div>
+            )}
+          </FormGroup>
+
           <ButtonGroup>
             <Button type="submit">수정 완료</Button>
             <Button type="button" onClick={() => setIsEditing(false)}>
@@ -590,6 +720,31 @@ const PreviewButton = styled.button`
   cursor: pointer;
   transition: background 0.2s;
   &:hover { background: #1565c0; }
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const Label = styled.label`
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
+`;
+
+const Select = styled.select`
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+
+  &:focus {
+    outline: none;
+    border-color: #1976d2;
+  }
 `;
 
 export default PostDetail; 
