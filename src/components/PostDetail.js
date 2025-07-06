@@ -130,11 +130,13 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
     }
   };
 
-  const getFullMediaUrl = (url) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `http://localhost:5000${url}`;
-  };
+  const BACKEND_URL = "https://science-club-forum.onrender.com";
+  function getFullMediaUrl(url) {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    // 상대경로면 백엔드 도메인 붙이기
+    return BACKEND_URL + url;
+  }
 
   const handleImageDownload = async () => {
     try {
