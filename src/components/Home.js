@@ -10,14 +10,14 @@ const Home = ({ posts }) => {
   const recentPosts = postsArray.slice(0, 5);
 
   const categoryMap = {
-    intro: '탐구입문',
-    design: '탐구 설계・자료 추천',
-    trial: '연구 중 시행착오 나눔',
-    result: '이상한 결과・결론 도출 질문',
-    feedback: '탐구 피드백・보완 제안',
-    humanities: '인문 계열 지식 토론',
-    science: '자연 계열 지식 토론',
-    fusion: '융합형 토론・모델 제안',
+    intro: '0. 탐구입문',
+    design: '1. 탐구 설계・자료 추천',
+    trial: '2. 연구 중 시행착오 나눔',
+    result: '3. 이상한 결과・결론 도출 질문',
+    feedback: '4. 탐구 피드백・보완 제안',
+    humanities: '5. 인문 계열 지식 토론',
+    science: '6. 자연 계열 지식 토론',
+    fusion: '7. 융합형 토론・모델 제안',
   };
 
   return (
@@ -56,28 +56,28 @@ const Home = ({ posts }) => {
         <h2>카테고리</h2>
         <CategoryGrid>
           <CategoryCard onClick={() => navigate('/board?category=intro')}>
-            <h3>탐구입문</h3>
+            <h3>0. 탐구입문</h3>
           </CategoryCard>
           <CategoryCard onClick={() => navigate('/board?category=design')}>
-            <h3>탐구 설계・자료 추천</h3>
+            <h3>1. 탐구 설계・자료 추천</h3>
           </CategoryCard>
           <CategoryCard onClick={() => navigate('/board?category=trial')}>
-            <h3>연구 중 시행착오 나눔</h3>
+            <h3>2. 연구 중 시행착오 나눔</h3>
           </CategoryCard>
           <CategoryCard onClick={() => navigate('/board?category=result')}>
-            <h3>이상한 결과・결론 도출 질문</h3>
+            <h3>3. 이상한 결과・결론 도출 질문</h3>
           </CategoryCard>
           <CategoryCard onClick={() => navigate('/board?category=feedback')}>
-            <h3>탐구 피드백・보완 제안</h3>
+            <h3>4. 탐구 피드백・보완 제안</h3>
           </CategoryCard>
           <CategoryCard onClick={() => navigate('/board?category=humanities')}>
-            <h3>인문 계열 지식 토론</h3>
+            <h3>5. 인문 계열 지식 토론</h3>
           </CategoryCard>
           <CategoryCard onClick={() => navigate('/board?category=science')}>
-            <h3>자연 계열 지식 토론</h3>
+            <h3>6. 자연 계열 지식 토론</h3>
           </CategoryCard>
           <CategoryCard onClick={() => navigate('/board?category=fusion')}>
-            <h3>융합형 토론・모델 제안</h3>
+            <h3>7. 융합형 토론・모델 제안</h3>
           </CategoryCard>
         </CategoryGrid>
       </Section>

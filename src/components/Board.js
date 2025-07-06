@@ -105,14 +105,14 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
   };
 
   const categoryMap = {
-    intro: '탐구입문',
-    design: '탐구 설계・자료 추천',
-    trial: '연구 중 시행착오 나눔',
-    result: '이상한 결과・결론 도출 질문',
-    feedback: '탐구 피드백・보완 제안',
-    humanities: '인문 계열 지식 토론',
-    science: '자연 계열 지식 토론',
-    fusion: '융합형 토론・모델 제안',
+    intro: '0. 탐구입문',
+    design: '1. 탐구 설계・자료 추천',
+    trial: '2. 연구 중 시행착오 나눔',
+    result: '3. 이상한 결과・결론 도출 질문',
+    feedback: '4. 탐구 피드백・보완 제안',
+    humanities: '5. 인문 계열 지식 토론',
+    science: '6. 자연 계열 지식 토론',
+    fusion: '7. 융합형 토론・모델 제안',
   };
 
   return (
@@ -122,14 +122,14 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
       <CategoryFilter>
         <Select value={selectedCategory} onChange={handleCategoryChange}>
           <option value="all">전체</option>
-          <option value="intro">탐구입문</option>
-          <option value="design">탐구 설계・자료 추천</option>
-          <option value="trial">연구 중 시행착오 나눔</option>
-          <option value="result">이상한 결과・결론 도출 질문</option>
-          <option value="feedback">탐구 피드백・보완 제안</option>
-          <option value="humanities">인문 계열 지식 토론</option>
-          <option value="science">자연 계열 지식 토론</option>
-          <option value="fusion">융합형 토론・모델 제안</option>
+          <option value="intro">0. 탐구입문</option>
+          <option value="design">1. 탐구 설계・자료 추천</option>
+          <option value="trial">2. 연구 중 시행착오 나눔</option>
+          <option value="result">3. 이상한 결과・결론 도출 질문</option>
+          <option value="feedback">4. 탐구 피드백・보완 제안</option>
+          <option value="humanities">5. 인문 계열 지식 토론</option>
+          <option value="science">6. 자연 계열 지식 토론</option>
+          <option value="fusion">7. 융합형 토론・모델 제안</option>
         </Select>
       </CategoryFilter>
 

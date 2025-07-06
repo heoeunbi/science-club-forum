@@ -203,11 +203,14 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
   };
 
   const categoryMap = {
-    physics: '물리',
-    chemistry: '화학',
-    biology: '생물',
-    earth: '지구과학',
-    math: '수학',
+    intro: '0. 탐구입문',
+    design: '1. 탐구 설계・자료 추천',
+    trial: '2. 연구 중 시행착오 나눔',
+    result: '3. 이상한 결과・결론 도출 질문',
+    feedback: '4. 탐구 피드백・보완 제안',
+    humanities: '5. 인문 계열 지식 토론',
+    science: '6. 자연 계열 지식 토론',
+    fusion: '7. 융합형 토론・모델 제안',
   };
 
   return (
