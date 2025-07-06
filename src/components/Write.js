@@ -347,6 +347,7 @@ const Write = ({ userId }) => {
             className={validateCategory() ? 'error' : ''}
           >
             <option value="">카테고리 선택</option>
+            <option value="notice">공지</option>
             <option value="intro">0. 탐구입문</option>
             <option value="design">1. 탐구 설계・자료 추천</option>
             <option value="trial">2. 연구 중 시행착오 나눔</option>

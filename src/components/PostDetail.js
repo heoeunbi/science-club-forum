@@ -205,6 +205,7 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
   };
 
   const categoryMap = {
+    notice: '공지',
     intro: '0. 탐구입문',
     design: '1. 탐구 설계・자료 추천',
     trial: '2. 연구 중 시행착오 나눔',

@@ -116,6 +116,7 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
   };
 
   const categoryMap = {
+    notice: '공지',
     intro: '0. 탐구입문',
     design: '1. 탐구 설계・자료 추천',
     trial: '2. 연구 중 시행착오 나눔',
@@ -133,6 +134,7 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
       <CategoryFilter>
         <Select value={selectedCategory} onChange={handleCategoryChange}>
           <option value="all">전체</option>
+          <option value="notice">공지</option>
           <option value="intro">0. 탐구입문</option>
           <option value="design">1. 탐구 설계・자료 추천</option>
           <option value="trial">2. 연구 중 시행착오 나눔</option>

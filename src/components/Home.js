@@ -10,6 +10,7 @@ const Home = ({ posts }) => {
   const recentPosts = postsArray.slice(0, 5);
 
   const categoryMap = {
+    notice: '공지',
     intro: '0. 탐구입문',
     design: '1. 탐구 설계・자료 추천',
     trial: '2. 연구 중 시행착오 나눔',
@@ -55,6 +56,9 @@ const Home = ({ posts }) => {
       <Section>
         <h2>카테고리</h2>
         <CategoryGrid>
+          <CategoryCard onClick={() => navigate('/board?category=notice')}>
+            <h3>공지</h3>
+          </CategoryCard>
           <CategoryCard onClick={() => navigate('/board?category=intro')}>
             <h3>0. 탐구입문</h3>
           </CategoryCard>
