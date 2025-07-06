@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { fileService, postService } from '../services/firebaseService';
 
 const WriteContainer = styled.div`
   max-width: 800px;
@@ -210,6 +211,7 @@ const Write = ({ userId }) => {
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
+    
     if (selectedFile) {
       // 파일 크기 검사
       if (selectedFile.size > VALIDATION.FILE_SIZE_MAX) {
@@ -246,25 +248,36 @@ const Write = ({ userId }) => {
     setError('');
     setSuccess('게시글을 작성 중입니다...');
 
-    const formData = new FormData();
-    formData.append('title', title.trim());
-    formData.append('content', content.trim());
-    formData.append('category', category);
-    formData.append('author', isAnonymous ? '익명' : author.trim());
-    formData.append('hiddenUserId', userId);
-    if (link.trim()) formData.append('link', link.trim());
-    if (file) formData.append('file', file);
-
     try {
-      const response = await fetch('https://science-club-forum.onrender.com/api/posts', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || '게시글 작성에 실패했습니다.');
+      let mediaUrl = null;
+      let mediaType = 'none';
+
+      // 파일이 있으면 Firebase Storage에 업로드
+      if (file) {
+        setSuccess('파일을 업로드 중입니다...');
+        const fileName = `${Date.now()}-${file.name}`;
+        mediaUrl = await fileService.uploadImage(file, fileName);
+        mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+        setSuccess('파일 업로드 완료! 게시글을 작성 중입니다...');
       }
+
+      // 게시글 데이터 준비
+      const postData = {
+        title: title.trim(),
+        content: content.trim(),
+        category,
+        author: isAnonymous ? '익명' : author.trim(),
+        hiddenUserId: userId,
+        link: link.trim() || '',
+        mediaUrl,
+        mediaType,
+        likes: 0,
+        likedUsers: [],
+        comments: []
+      };
+
+      // Firebase Firestore에 게시글 저장
+      const postId = await postService.createPost(postData);
       
       setSuccess('게시글이 성공적으로 작성되었습니다!');
       setTimeout(() => {
@@ -272,7 +285,8 @@ const Write = ({ userId }) => {
       }, 1500);
       
     } catch (err) {
-      setError(err.message);
+      console.error('업로드 에러:', err);
+      setError(err.message || '게시글 작성에 실패했습니다.');
       setSuccess('');
     }
   };
@@ -385,10 +399,25 @@ const Write = ({ userId }) => {
             type="file"
             accept="image/*,video/*"
             onChange={handleFileChange}
+            capture="environment"
+            style={{ 
+              fontSize: '16px', // 모바일에서 확대 방지
+              padding: '12px',
+              border: '2px dashed #ccc',
+              borderRadius: '8px',
+              backgroundColor: '#f9f9f9'
+            }}
           />
+          <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+            📱 모바일에서는 카메라로 직접 촬영하거나 갤러리에서 선택할 수 있습니다
+          </div>
           {file && (
             <FileInfo>
               파일명: {file.name} | 크기: {(file.size / (1024 * 1024)).toFixed(2)}MB
+              <br />
+              타입: {file.type} | 마지막 수정: {new Date(file.lastModified).toLocaleString()}
+              <br />
+              <strong style={{ color: '#28a745' }}>✅ 업로드 준비 완료!</strong>
             </FileInfo>
           )}
         </FormGroup>

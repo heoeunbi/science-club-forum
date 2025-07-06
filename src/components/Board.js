@@ -17,10 +17,10 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
   const getFullMediaUrl = (mediaUrl) => {
     if (!mediaUrl) return '';
     if (mediaUrl.startsWith('http://') || mediaUrl.startsWith('https://')) {
-      return mediaUrl;
+      return mediaUrl; // Firebase Storage URL은 그대로 사용
     }
     // 백엔드 URL을 환경변수에서 가져오거나 기본값 사용
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://your-backend-url.onrender.com';
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://science-club-forum.onrender.com';
     return `${backendUrl}${mediaUrl}`;
   };
 
