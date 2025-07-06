@@ -10,11 +10,14 @@ const Home = ({ posts }) => {
   const recentPosts = postsArray.slice(0, 5);
 
   const categoryMap = {
-    physics: '물리',
-    chemistry: '화학',
-    biology: '생물',
-    earth: '지구과학',
-    math: '수학',
+    intro: '탐구입문',
+    design: '탐구 설계・자료 추천',
+    trial: '연구 중 시행착오 나눔',
+    result: '이상한 결과・결론 도출 질문',
+    feedback: '탐구 피드백・보완 제안',
+    humanities: '인문 계열 지식 토론',
+    science: '자연 계열 지식 토론',
+    fusion: '융합형 토론・모델 제안',
   };
 
   return (
@@ -52,20 +55,29 @@ const Home = ({ posts }) => {
       <Section>
         <h2>카테고리</h2>
         <CategoryGrid>
-          <CategoryCard onClick={() => navigate('/board?category=physics')}>
-            <h3>물리</h3>
+          <CategoryCard onClick={() => navigate('/board?category=intro')}>
+            <h3>탐구입문</h3>
           </CategoryCard>
-          <CategoryCard onClick={() => navigate('/board?category=chemistry')}>
-            <h3>화학</h3>
+          <CategoryCard onClick={() => navigate('/board?category=design')}>
+            <h3>탐구 설계・자료 추천</h3>
           </CategoryCard>
-          <CategoryCard onClick={() => navigate('/board?category=biology')}>
-            <h3>생물</h3>
+          <CategoryCard onClick={() => navigate('/board?category=trial')}>
+            <h3>연구 중 시행착오 나눔</h3>
           </CategoryCard>
-          <CategoryCard onClick={() => navigate('/board?category=earth')}>
-            <h3>지구과학</h3>
+          <CategoryCard onClick={() => navigate('/board?category=result')}>
+            <h3>이상한 결과・결론 도출 질문</h3>
           </CategoryCard>
-          <CategoryCard onClick={() => navigate('/board?category=math')}>
-            <h3>수학</h3>
+          <CategoryCard onClick={() => navigate('/board?category=feedback')}>
+            <h3>탐구 피드백・보완 제안</h3>
+          </CategoryCard>
+          <CategoryCard onClick={() => navigate('/board?category=humanities')}>
+            <h3>인문 계열 지식 토론</h3>
+          </CategoryCard>
+          <CategoryCard onClick={() => navigate('/board?category=science')}>
+            <h3>자연 계열 지식 토론</h3>
+          </CategoryCard>
+          <CategoryCard onClick={() => navigate('/board?category=fusion')}>
+            <h3>융합형 토론・모델 제안</h3>
           </CategoryCard>
         </CategoryGrid>
       </Section>

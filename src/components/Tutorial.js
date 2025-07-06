@@ -8,9 +8,9 @@ const Tutorial = () => {
 
   const tutorialSteps = [
     {
-      title: "수학과학 동아리 포럼에 오신 것을 환영합니다!",
-      content: "이 튜토리얼을 통해 포럼의 주요 기능과 사용법을 알아보겠습니다.",
-      image: "🏠",
+      title: "안녕하세요.",
+      content: "생각을 말로 옮기고, 그 말을 서로 요약하며 다시 생각하는 훈련의 공간에 오신 것을 환영합니다.",
+      image: "👋",
       action: "다음"
     },
     {
