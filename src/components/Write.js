@@ -256,7 +256,7 @@ const Write = ({ userId }) => {
     if (file) formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/posts', {
+      const response = await fetch('https://science-club-forum.onrender.com/api/posts', {
         method: 'POST',
         body: formData,
       });
