@@ -668,13 +668,13 @@ const Input = styled.input`
 `;
 
 const TextArea = styled.textarea`
+  width: 100%;
   padding: 0.8rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
-  min-height: 200px;
+  min-height: 300px;
   resize: vertical;
-
   &:focus {
     outline: none;
     border-color: #1976d2;
