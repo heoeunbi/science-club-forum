@@ -399,7 +399,6 @@ const Write = ({ userId }) => {
             type="file"
             accept="image/*,video/*"
             onChange={handleFileChange}
-            capture="environment"
             style={{ 
               fontSize: '16px', // 모바일에서 확대 방지
               padding: '12px',
