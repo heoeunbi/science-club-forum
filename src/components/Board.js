@@ -13,6 +13,17 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
   const POSTS_PER_PAGE = 15;
   const [currentPage, setCurrentPage] = useState(1);
 
+  // 이미지 URL에 백엔드 도메인 추가하는 함수
+  const getFullMediaUrl = (mediaUrl) => {
+    if (!mediaUrl) return '';
+    if (mediaUrl.startsWith('http://') || mediaUrl.startsWith('https://')) {
+      return mediaUrl;
+    }
+    // 백엔드 URL을 환경변수에서 가져오거나 기본값 사용
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://your-backend-url.onrender.com';
+    return `${backendUrl}${mediaUrl}`;
+  };
+
   // refresh=1 쿼리스트링이 있으면 fetchPosts 실행 후 쿼리스트링 제거
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -146,9 +157,9 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
               {post.mediaUrl && (
                 <MediaPreview>
                   {post.mediaType === 'image' ? (
-                    <img src={post.mediaUrl} alt="Post media" />
+                    <img src={getFullMediaUrl(post.mediaUrl)} alt="Post media" />
                   ) : post.mediaType === 'video' ? (
-                    <video src={post.mediaUrl} controls />
+                    <video src={getFullMediaUrl(post.mediaUrl)} controls />
                   ) : null}
                 </MediaPreview>
               )}
