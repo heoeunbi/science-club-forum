@@ -333,11 +333,14 @@ const Write = ({ userId }) => {
             className={validateCategory() ? 'error' : ''}
           >
             <option value="">카테고리 선택</option>
-            <option value="physics">물리</option>
-            <option value="chemistry">화학</option>
-            <option value="biology">생물</option>
-            <option value="earth">지구과학</option>
-            <option value="math">수학</option>
+            <option value="intro">탐구입문</option>
+            <option value="design">탐구 설계・자료 추천</option>
+            <option value="trial">연구 중 시행착오 나눔</option>
+            <option value="result">이상한 결과・결론 도출 질문</option>
+            <option value="feedback">탐구 피드백・보완 제안</option>
+            <option value="humanities">인문 계열 지식 토론</option>
+            <option value="science">자연 계열 지식 토론</option>
+            <option value="fusion">융합형 토론・모델 제안</option>
           </Select>
         </FormGroup>
 
