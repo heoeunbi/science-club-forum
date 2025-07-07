@@ -236,6 +236,9 @@ const Write = ({ userId }) => {
     setMediaTypes(prev => [...prev, ...newTypes]);
     setError('');
     setSuccess(newFiles.length ? '파일이 성공적으로 추가되었습니다.' : '');
+
+    // 같은 파일을 연속으로 선택해도 input이 초기화되어 정상 동작
+    e.target.value = '';
   };
 
   const handleRemoveFile = (idx) => {
