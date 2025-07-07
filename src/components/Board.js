@@ -470,3 +470,63 @@ const CommentButton = styled.button`
 `;
 
 const CommentList = styled.div`
+`;
+
+const Comment = styled.div`
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  border: 1px solid #eee;
+`;
+
+const CommentAuthor = styled.h4`
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-size: 0.9rem;
+`;
+
+const CommentContent = styled.p`
+  color: #555;
+  font-size: 0.9rem;
+  line-height: 1.4;
+`;
+
+const MoreComments = styled.button`
+  background: none;
+  border: none;
+  color: #1976d2;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  margin-top: 0.5rem;
+
+  &:hover {
+    color: #1565c0;
+  }
+`;
+
+const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  gap: 1rem;
+
+  button {
+    padding: 0.8rem 1.5rem;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: #1565c0;
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+`;
