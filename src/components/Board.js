@@ -530,3 +530,5 @@ const Pagination = styled.div`
     }
   }
 `;
+
+export default Board;
