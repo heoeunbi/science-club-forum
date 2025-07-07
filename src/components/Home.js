@@ -7,7 +7,26 @@ const Home = ({ posts }) => {
 
   // posts가 배열인지 확인하고, 아니면 빈 배열로 설정
   const postsArray = Array.isArray(posts) ? posts : [];
-  const recentPosts = postsArray.slice(0, 5);
+  
+  // 고정된 게시물과 일반 게시물을 분리
+  const pinnedPosts = postsArray.filter(post => post.isPinned);
+  const normalPosts = postsArray.filter(post => !post.isPinned);
+  
+  // 고정된 게시물은 pinnedAt 기준으로 정렬, 일반 게시물은 createdAt 기준으로 정렬
+  const sortedPinnedPosts = pinnedPosts.sort((a, b) => {
+    const aTime = a.pinnedAt?.toDate?.() || new Date(a.pinnedAt) || new Date(0);
+    const bTime = b.pinnedAt?.toDate?.() || new Date(b.pinnedAt) || new Date(0);
+    return bTime - aTime;
+  });
+  
+  const sortedNormalPosts = normalPosts.sort((a, b) => {
+    const aTime = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date(0);
+    const bTime = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date(0);
+    return bTime - aTime;
+  });
+  
+  // 고정된 게시물을 먼저 표시하고, 나머지 공간에 일반 게시물을 채움
+  const recentPosts = [...sortedPinnedPosts, ...sortedNormalPosts].slice(0, 5);
 
   const categoryMap = {
     notice: '공지',
@@ -35,10 +54,13 @@ const Home = ({ posts }) => {
         <h2>최근 게시글</h2>
         <PostList>
           {recentPosts.map(post => (
-            <PostItem key={post.id || post._id} onClick={() => navigate(`/post/${post.id || post._id}`)}>
+            <PostItem key={post.id || post._id} onClick={() => navigate(`/post/${post.id || post._id}`)} $isPinned={post.isPinned}>
               <PostHeader>
-                <CategoryTag>{categoryMap[post.category] || post.category}</CategoryTag>
-                <Title>{post.title}</Title>
+                <HeaderLeft>
+                  <CategoryTag>{categoryMap[post.category] || post.category}</CategoryTag>
+                  {post.isPinned && <PinIcon>📌</PinIcon>}
+                  <Title>{post.title}</Title>
+                </HeaderLeft>
               </PostHeader>
               <PostContent>
                 <p>{(post.content || '').substring(0, 100)}...</p>
@@ -134,6 +156,10 @@ const PostItem = styled.article`
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   transition: transform 0.2s;
   cursor: pointer;
+  border-left: 4px solid ${props => props.$isPinned ? '#1976d2' : 'transparent'};
+  ${props => props.$isPinned && `
+    background: #f8f9fa;
+  `}
 
   &:hover {
     transform: translateY(-2px);
@@ -142,6 +168,17 @@ const PostItem = styled.article`
 
 const PostHeader = styled.header`
   margin-bottom: 1rem;
+`;
+
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const PinIcon = styled.span`
+  font-size: 1.2rem;
+  color: #1976d2;
 `;
 
 const CategoryTag = styled.span`

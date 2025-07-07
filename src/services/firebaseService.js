@@ -132,6 +132,31 @@ export const postService = {
       console.error('좋아요 토글 오류:', error);
       throw error;
     }
+  },
+
+  // 게시물 고정/고정 해제 토글
+  async togglePin(postId) {
+    try {
+      const postRef = doc(db, 'posts', postId);
+      const postDoc = await getDoc(postRef);
+      
+      if (!postDoc.exists()) {
+        throw new Error('게시글을 찾을 수 없습니다.');
+      }
+
+      const postData = postDoc.data();
+      const isPinned = postData.isPinned || false;
+
+      await updateDoc(postRef, {
+        isPinned: !isPinned,
+        pinnedAt: !isPinned ? serverTimestamp() : null
+      });
+
+      return !isPinned;
+    } catch (error) {
+      console.error('게시물 고정 토글 오류:', error);
+      throw error;
+    }
   }
 };
 

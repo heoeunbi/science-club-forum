@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDeleteComment, onLike, likedPosts, userId, isAdmin }) => {
+const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDeleteComment, onLike, likedPosts, userId, isAdmin, onTogglePin }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [comment, setComment] = useState('');
@@ -373,20 +373,25 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
       ) : (
         <>
           <PostHeader>
-            <Title>{post.title}</Title>
-            <PostInfo>
-              <span>작성자: {post.author}</span>
-              <span>카테고리: {categoryMap[post.category] || post.category}</span>
-              <span>좋아요: {post.likes}</span>
-            </PostInfo>
-            {(isAuthor || isAdmin) && (
-              <ButtonGroup>
-                {isAuthor && <Button onClick={handleEdit}>수정</Button>}
-                <Button onClick={handleDelete}>
-                  {isAdmin ? '관리자 삭제' : '삭제'}
-                </Button>
-              </ButtonGroup>
-            )}
+            <HeaderLeft>
+              <Title>{post.title}</Title>
+              {post.isPinned && <PinIcon>📌</PinIcon>}
+            </HeaderLeft>
+            <HeaderRight>
+              {isAdmin && (
+                <PinButton onClick={() => onTogglePin(post.id || post._id)}>
+                  {post.isPinned ? '📌 고정 해제' : '📌 고정'}
+                </PinButton>
+              )}
+              {(isAuthor || isAdmin) && (
+                <ButtonGroup>
+                  {isAuthor && <Button onClick={handleEdit}>수정</Button>}
+                  <Button onClick={handleDelete}>
+                    {isAdmin ? '관리자 삭제' : '삭제'}
+                  </Button>
+                </ButtonGroup>
+              )}
+            </HeaderRight>
           </PostHeader>
 
           <Content>{post.content}</Content>
@@ -533,6 +538,39 @@ const DetailContainer = styled.div`
 
 const PostHeader = styled.header`
   margin-bottom: 2rem;
+`;
+
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const HeaderRight = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const PinIcon = styled.span`
+  font-size: 1.2rem;
+  color: #1976d2;
+`;
+
+const PinButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+
+  &:hover {
+    background-color: #e3f2fd;
+  }
 `;
 
 const Title = styled.h1`

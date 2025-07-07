@@ -103,6 +103,15 @@ const App = () => {
     }
   };
 
+  const handleTogglePin = async (postId) => {
+    try {
+      await postService.togglePin(postId);
+      await fetchPosts();
+    } catch (error) {
+      console.error('Error toggling pin:', error);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('userId');
     localStorage.removeItem('isAdmin');
@@ -138,11 +147,13 @@ const App = () => {
                 element={
                   <Board 
                     posts={posts} 
-                    likedPosts={likedPosts}
+                    likedPosts={likedPosts} 
                     onLike={handleLike}
                     onAddComment={handleAddComment}
                     userId={userId}
                     fetchPosts={fetchPosts}
+                    onTogglePin={handleTogglePin}
+                    isAdmin={isAdmin}
                   />
                 } 
               />
@@ -169,6 +180,7 @@ const App = () => {
                     likedPosts={likedPosts}
                     userId={userId}
                     isAdmin={isAdmin}
+                    onTogglePin={handleTogglePin}
                   />
                 } 
               />

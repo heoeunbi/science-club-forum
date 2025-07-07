@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) => {
+const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts, onTogglePin, isAdmin }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
@@ -51,14 +51,40 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
 
   // posts가 배열인지 확인하고, 아니면 빈 배열로 설정
   const postsArray = Array.isArray(posts) ? posts : [];
-  const filteredPosts = selectedCategory === 'all'
-    ? postsArray
-    : postsArray.filter(post => post.category === selectedCategory);
+  
+  // 고정된 게시물과 일반 게시물을 분리
+  const pinnedPosts = postsArray.filter(post => post.isPinned);
+  const normalPosts = postsArray.filter(post => !post.isPinned);
+  
+  // 고정된 게시물은 pinnedAt 기준으로 정렬, 일반 게시물은 createdAt 기준으로 정렬
+  const sortedPinnedPosts = pinnedPosts.sort((a, b) => {
+    const aTime = a.pinnedAt?.toDate?.() || new Date(a.pinnedAt) || new Date(0);
+    const bTime = b.pinnedAt?.toDate?.() || new Date(b.pinnedAt) || new Date(0);
+    return bTime - aTime;
+  });
+  
+  const sortedNormalPosts = normalPosts.sort((a, b) => {
+    const aTime = a.createdAt?.toDate?.() || new Date(a.createdAt) || new Date(0);
+    const bTime = b.createdAt?.toDate?.() || new Date(b.createdAt) || new Date(0);
+    return bTime - aTime;
+  });
+  
+  // 카테고리 필터링
+  const filteredPinnedPosts = selectedCategory === 'all'
+    ? sortedPinnedPosts
+    : sortedPinnedPosts.filter(post => post.category === selectedCategory);
+    
+  const filteredNormalPosts = selectedCategory === 'all'
+    ? sortedNormalPosts
+    : sortedNormalPosts.filter(post => post.category === selectedCategory);
 
-  // 페이지네이션 적용
-  const totalPosts = filteredPosts.length;
-  const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
-  const paginatedPosts = filteredPosts.slice((currentPage - 1) * POSTS_PER_PAGE, currentPage * POSTS_PER_PAGE);
+  // 페이지네이션 적용 (고정된 게시물은 항상 표시, 일반 게시물만 페이지네이션)
+  const totalNormalPosts = filteredNormalPosts.length;
+  const totalPages = Math.ceil(totalNormalPosts / POSTS_PER_PAGE);
+  const paginatedNormalPosts = filteredNormalPosts.slice((currentPage - 1) * POSTS_PER_PAGE, currentPage * POSTS_PER_PAGE);
+  
+  // 최종 표시할 게시물 목록 (고정된 게시물 + 페이지네이션된 일반 게시물)
+  const displayPosts = [...filteredPinnedPosts, ...paginatedNormalPosts];
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -147,11 +173,19 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts }) 
       </CategoryFilter>
 
       <PostList>
-        {paginatedPosts.map(post => (
-          <PostItem key={post.id || post._id}>
+        {displayPosts.map(post => (
+          <PostItem key={post.id || post._id} $isPinned={post.isPinned}>
             <PostHeader>
-              <CategoryTag>{categoryMap[post.category] || post.category}</CategoryTag>
-              <Title onClick={() => handlePostClick(post.id || post._id)}>{post.title}</Title>
+              <HeaderLeft>
+                <CategoryTag>{categoryMap[post.category] || post.category}</CategoryTag>
+                {post.isPinned && <PinIcon>📌</PinIcon>}
+                <Title onClick={() => handlePostClick(post.id || post._id)}>{post.title}</Title>
+              </HeaderLeft>
+              {isAdmin && (
+                <PinButton onClick={() => onTogglePin(post.id || post._id)}>
+                  {post.isPinned ? '📌 고정 해제' : '📌 고정'}
+                </PinButton>
+              )}
             </PostHeader>
 
             <PostContent>
@@ -282,12 +316,49 @@ const PostList = styled.div`
 const PostItem = styled.article`
   background: white;
   padding: 1.5rem;
+  margin-bottom: 1rem;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  ${props => props.$isPinned && `
+    border-left: 4px solid #1976d2;
+    background: #f8f9fa;
+  `}
 `;
 
 const PostHeader = styled.header`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1rem;
+`;
+
+const HeaderLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const PinIcon = styled.span`
+  font-size: 1.2rem;
+  color: #1976d2;
+`;
+
+const PinButton = styled.button`
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #d0d0d0;
+  }
 `;
 
 const CategoryTag = styled.span`
@@ -399,63 +470,3 @@ const CommentButton = styled.button`
 `;
 
 const CommentList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const Comment = styled.div`
-  padding: 0.5rem;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-`;
-
-const CommentAuthor = styled.div`
-  font-weight: 500;
-  margin-bottom: 0.3rem;
-`;
-
-const CommentContent = styled.div`
-  color: #333;
-`;
-
-const MoreComments = styled.button`
-  background: none;
-  border: none;
-  color: #1976d2;
-  cursor: pointer;
-  padding: 0.5rem;
-  text-align: left;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const Pagination = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin: 2rem 0;
-  button {
-    padding: 0.5rem 1.2rem;
-    border: none;
-    border-radius: 4px;
-    background: #1976d2;
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
-    &:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-  }
-  span {
-    font-size: 1.1rem;
-    color: #1976d2;
-    font-weight: bold;
-  }
-`;
-
-export default Board; 
