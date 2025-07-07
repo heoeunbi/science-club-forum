@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -55,12 +55,19 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
   // 1. 상태 추가
   const [editedFiles, setEditedFiles] = useState([]); // 새로 추가된 파일들
   const [editedMediaTypes, setEditedMediaTypes] = useState([]); // 새로 추가된 파일 타입
-  const [existingMediaUrls, setExistingMediaUrls] = useState(post.mediaUrls || (post.mediaUrl ? [post.mediaUrl] : [])); // 기존 파일 URL 배열
-  const [existingMediaTypes, setExistingMediaTypes] = useState(post.mediaTypes || (post.mediaType ? [post.mediaType] : [])); // 기존 파일 타입 배열
+  const [existingMediaUrls, setExistingMediaUrls] = useState([]); // 기존 파일 URL 배열
+  const [existingMediaTypes, setExistingMediaTypes] = useState([]); // 기존 파일 타입 배열
 
   // posts가 배열인지 확인하고, 아니면 빈 배열로 설정
   const postsArray = Array.isArray(posts) ? posts : [];
   const post = postsArray.find(p => (p._id === id || p.id === id));
+
+  useEffect(() => {
+    if (post) {
+      setExistingMediaUrls(post.mediaUrls || (post.mediaUrl ? [post.mediaUrl] : []));
+      setExistingMediaTypes(post.mediaTypes || (post.mediaType ? [post.mediaType] : []));
+    }
+  }, [post]);
 
   if (!post) {
     return (
