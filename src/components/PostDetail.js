@@ -20,6 +20,12 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
   const [editedMediaType, setEditedMediaType] = useState('');
   const [showImagePreview, setShowImagePreview] = useState(false);
 
+  // 1. 상태 추가
+  const [editedFiles, setEditedFiles] = useState([]); // 새로 추가된 파일들
+  const [editedMediaTypes, setEditedMediaTypes] = useState([]); // 새로 추가된 파일 타입
+  const [existingMediaUrls, setExistingMediaUrls] = useState(post.mediaUrls || (post.mediaUrl ? [post.mediaUrl] : [])); // 기존 파일 URL 배열
+  const [existingMediaTypes, setExistingMediaTypes] = useState(post.mediaTypes || (post.mediaType ? [post.mediaType] : [])); // 기존 파일 타입 배열
+
   // posts가 배열인지 확인하고, 아니면 빈 배열로 설정
   const postsArray = Array.isArray(posts) ? posts : [];
   const post = postsArray.find(p => (p._id === id || p.id === id));
@@ -48,51 +54,82 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
     setIsEditing(true);
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      // 파일 크기 검사 (10MB)
-      if (selectedFile.size > 10 * 1024 * 1024) {
-        alert('파일 크기는 최대 10MB까지 가능합니다.');
-        e.target.value = '';
-        return;
-      }
-
-      // 파일 타입 검사
-      if (!selectedFile.type.startsWith('image/') && !selectedFile.type.startsWith('video/')) {
-        alert('이미지 또는 비디오 파일만 업로드 가능합니다.');
-        e.target.value = '';
-        return;
-      }
-
-      setEditedFile(selectedFile);
-      setEditedMediaType(selectedFile.type.startsWith('video/') ? 'video' : 'image');
+  // 2. 파일 추가 핸들러
+  const handleEditFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    const newFiles = [];
+    const newTypes = [];
+    for (const file of selectedFiles) {
+      // 중복 체크: 기존 파일과 새 파일 모두에서 중복 방지
+      const isDuplicate = editedFiles.some(f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified)
+        || existingMediaUrls.some((url, idx) => url.endsWith(file.name) && existingMediaTypes[idx] === (file.type.startsWith('video/') ? 'video' : 'image'));
+      if (isDuplicate) continue;
+      if (file.size > 10 * 1024 * 1024) continue;
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
+      newFiles.push(file);
+      newTypes.push(file.type.startsWith('video/') ? 'video' : 'image');
     }
+    setEditedFiles(prev => [...prev, ...newFiles]);
+    setEditedMediaTypes(prev => [...prev, ...newTypes]);
+    e.target.value = '';
+  };
+
+  // 3. 파일 삭제 핸들러
+  const handleRemoveExistingFile = (idx) => {
+    setExistingMediaUrls(urls => urls.filter((_, i) => i !== idx));
+    setExistingMediaTypes(types => types.filter((_, i) => i !== idx));
+  };
+  const handleRemoveEditedFile = (idx) => {
+    setEditedFiles(files => files.filter((_, i) => i !== idx));
+    setEditedMediaTypes(types => types.filter((_, i) => i !== idx));
+  };
+
+  // 4. 파일 순서 변경 핸들러 (기존/새 파일 모두)
+  const moveExistingFile = (idx, direction) => {
+    const newUrls = [...existingMediaUrls];
+    const newTypes = [...existingMediaTypes];
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= newUrls.length) return;
+    [newUrls[idx], newUrls[targetIdx]] = [newUrls[targetIdx], newUrls[idx]];
+    [newTypes[idx], newTypes[targetIdx]] = [newTypes[targetIdx], newTypes[idx]];
+    setExistingMediaUrls(newUrls);
+    setExistingMediaTypes(newTypes);
+  };
+  const moveEditedFile = (idx, direction) => {
+    const newFiles = [...editedFiles];
+    const newTypes = [...editedMediaTypes];
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= newFiles.length) return;
+    [newFiles[idx], newFiles[targetIdx]] = [newFiles[targetIdx], newFiles[idx]];
+    [newTypes[idx], newTypes[targetIdx]] = [newTypes[targetIdx], newTypes[idx]];
+    setEditedFiles(newFiles);
+    setEditedMediaTypes(newTypes);
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      let mediaUrl = post.mediaUrl; // 기존 파일 URL 유지
-      let mediaType = post.mediaType || 'none';
-
-      // 새 파일이 선택된 경우 Firebase Storage에 업로드
-      if (editedFile) {
-        const { fileService } = await import('../services/firebaseService');
-        const fileName = `${Date.now()}-${editedFile.name}`;
-        mediaUrl = await fileService.uploadImage(editedFile, fileName);
-        mediaType = editedMediaType;
+      let newMediaUrls = [...existingMediaUrls];
+      let newMediaTypes = [...existingMediaTypes];
+      // 새 파일 업로드
+      if (editedFiles.length > 0) {
+        for (let i = 0; i < editedFiles.length; i++) {
+          const file = editedFiles[i];
+          const { fileService } = await import('../services/firebaseService');
+          const fileName = `${Date.now()}-${file.name}`;
+          const url = await fileService.uploadImage(file, fileName);
+          newMediaUrls.push(url);
+          newMediaTypes.push(editedMediaTypes[i]);
+        }
       }
-
       const updateData = {
         title: editedTitle,
         content: editedContent,
         category: editedCategory,
         author: editedIsAnonymous ? '익명' : editedAuthor,
-        mediaUrl,
-        mediaType
+        mediaUrls: newMediaUrls,
+        mediaTypes: newMediaTypes
       };
-
       await onEdit(post.id || post._id, updateData);
       setIsEditing(false);
     } catch (error) {
@@ -343,23 +380,52 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
             <Input
               type="file"
               accept="image/*,video/*"
-              onChange={handleFileChange}
-              style={{ 
-                fontSize: '16px',
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px'
-              }}
+              multiple
+              onChange={handleEditFileChange}
+              style={{ fontSize: '16px', padding: '8px', border: '1px solid #ddd', borderRadius: '4px' }}
             />
-            {editedFile && (
-              <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
-                새 파일: {editedFile.name} ({(editedFile.size / (1024 * 1024)).toFixed(2)}MB)
-              </div>
+            <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+              📱 모바일에서는 카메라로 직접 촬영하거나 갤러리에서 선택할 수 있습니다
+            </div>
+            {/* 기존 파일 미리보기 */}
+            {existingMediaUrls.length > 0 && (
+              <PreviewContainer>
+                {existingMediaUrls.map((url, idx) => (
+                  <div key={url + idx} style={{ marginBottom: 8 }}>
+                    {existingMediaTypes[idx] === 'image' ? (
+                      <Media src={getFullMediaUrl(url)} alt="첨부 이미지" style={{ maxWidth: '100%', borderRadius: 4 }} />
+                    ) : (
+                      <Video src={getFullMediaUrl(url)} controls style={{ maxWidth: '100%', borderRadius: 4 }} />
+                    )}
+                    <FileInfo>
+                      기존 파일 | <a href={getFullMediaUrl(url)} target="_blank" rel="noopener noreferrer">{url.split('/').pop()}</a>
+                      <button type="button" onClick={() => handleRemoveExistingFile(idx)} style={{ marginLeft: 8, color: '#dc3545', border: 'none', background: 'none', cursor: 'pointer' }}>삭제</button>
+                      <button type="button" onClick={() => moveExistingFile(idx, -1)} disabled={idx === 0} style={{ marginLeft: 8 }}>▲</button>
+                      <button type="button" onClick={() => moveExistingFile(idx, 1)} disabled={idx === existingMediaUrls.length - 1}>▼</button>
+                    </FileInfo>
+                  </div>
+                ))}
+              </PreviewContainer>
             )}
-            {post.mediaUrl && !editedFile && (
-              <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
-                현재 파일: {post.mediaType === 'image' ? '이미지' : '비디오'} (변경하지 않으면 유지)
-              </div>
+            {/* 새 파일 미리보기 */}
+            {editedFiles.length > 0 && (
+              <PreviewContainer>
+                {editedFiles.map((file, idx) => (
+                  <div key={file.name + idx} style={{ marginBottom: 8 }}>
+                    {editedMediaTypes[idx] === 'image' ? (
+                      <Media src={URL.createObjectURL(file)} alt="미리보기" />
+                    ) : (
+                      <Video src={URL.createObjectURL(file)} controls />
+                    )}
+                    <FileInfo>
+                      새 파일: {file.name} | 크기: {(file.size / (1024 * 1024)).toFixed(2)}MB
+                      <button type="button" onClick={() => handleRemoveEditedFile(idx)} style={{ marginLeft: 8, color: '#dc3545', border: 'none', background: 'none', cursor: 'pointer' }}>삭제</button>
+                      <button type="button" onClick={() => moveEditedFile(idx, -1)} disabled={idx === 0} style={{ marginLeft: 8 }}>▲</button>
+                      <button type="button" onClick={() => moveEditedFile(idx, 1)} disabled={idx === editedFiles.length - 1}>▼</button>
+                    </FileInfo>
+                  </div>
+                ))}
+              </PreviewContainer>
             )}
           </FormGroup>
 
@@ -782,6 +848,38 @@ const Select = styled.select`
   &:focus {
     outline: none;
     border-color: #1976d2;
+  }
+`;
+
+const PreviewContainer = styled.div`
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 4px;
+`;
+
+const FileInfo = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #555;
+  button {
+    margin-left: 8px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    &:hover {
+      background-color: #d5d5d5;
+    }
+    &:disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
   }
 `;
 
