@@ -2,6 +2,38 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+const PreviewContainer = styled.div`
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 4px;
+`;
+
+const FileInfo = styled.div`
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #555;
+  button {
+    margin-left: 8px;
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    &:hover {
+      background-color: #d5d5d5;
+    }
+    &:disabled {
+      color: #ccc;
+      cursor: not-allowed;
+    }
+  }
+`;
+
 const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDeleteComment, onLike, likedPosts, userId, isAdmin, onTogglePin }) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -848,38 +880,6 @@ const Select = styled.select`
   &:focus {
     outline: none;
     border-color: #1976d2;
-  }
-`;
-
-const PreviewContainer = styled.div`
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border: 1px solid #eee;
-  border-radius: 4px;
-`;
-
-const FileInfo = styled.div`
-  display: flex;
-  align-items: center;
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  color: #555;
-  button {
-    margin-left: 8px;
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: #e0e0e0;
-    cursor: pointer;
-    &:hover {
-      background-color: #d5d5d5;
-    }
-    &:disabled {
-      color: #ccc;
-      cursor: not-allowed;
-    }
   }
 `;
 
