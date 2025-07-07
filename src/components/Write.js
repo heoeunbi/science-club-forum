@@ -129,8 +129,8 @@ const Write = ({ userId }) => {
   const [category, setCategory] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [author, setAuthor] = useState('');
-  const [file, setFile] = useState(null);
-  const [mediaType, setMediaType] = useState('');
+  const [files, setFiles] = useState([]); // 여러 파일
+  const [mediaTypes, setMediaTypes] = useState([]); // 여러 타입
   const [link, setLink] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -183,8 +183,13 @@ const Write = ({ userId }) => {
   };
 
   const validateFile = () => {
-    if (file && file.size > VALIDATION.FILE_SIZE_MAX) {
-      return `파일 크기는 최대 ${VALIDATION.FILE_SIZE_MAX / (1024 * 1024)}MB까지 가능합니다.`;
+    for (const file of files) {
+      if (file.size > VALIDATION.FILE_SIZE_MAX) {
+        return `파일 크기는 최대 ${VALIDATION.FILE_SIZE_MAX / (1024 * 1024)}MB까지 가능합니다.`;
+      }
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        return '이미지 또는 비디오 파일만 업로드 가능합니다.';
+      }
     }
     return '';
   };
@@ -210,28 +215,24 @@ const Write = ({ userId }) => {
   };
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    
-    if (selectedFile) {
-      // 파일 크기 검사
-      if (selectedFile.size > VALIDATION.FILE_SIZE_MAX) {
-        setError(`파일 크기는 최대 ${VALIDATION.FILE_SIZE_MAX / (1024 * 1024)}MB까지 가능합니다.`);
-        e.target.value = '';
-        return;
-      }
-
-      // 파일 타입 검사
-      if (!selectedFile.type.startsWith('image/') && !selectedFile.type.startsWith('video/')) {
-        setError('이미지 또는 비디오 파일만 업로드 가능합니다.');
-        e.target.value = '';
-        return;
-      }
-
-      setFile(selectedFile);
-      setMediaType(selectedFile.type.startsWith('video/') ? 'video' : 'image');
-      setError('');
-      setSuccess('파일이 성공적으로 선택되었습니다.');
+    const selectedFiles = Array.from(e.target.files);
+    const validFiles = [];
+    const validTypes = [];
+    for (const file of selectedFiles) {
+      if (file.size > VALIDATION.FILE_SIZE_MAX) continue;
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
+      validFiles.push(file);
+      validTypes.push(file.type.startsWith('video/') ? 'video' : 'image');
     }
+    setFiles(validFiles);
+    setMediaTypes(validTypes);
+    setError('');
+    setSuccess(validFiles.length ? '파일이 성공적으로 선택되었습니다.' : '');
+  };
+
+  const handleRemoveFile = (idx) => {
+    setFiles(files => files.filter((_, i) => i !== idx));
+    setMediaTypes(types => types.filter((_, i) => i !== idx));
   };
 
   const handleSubmit = async (e) => {
@@ -249,15 +250,18 @@ const Write = ({ userId }) => {
     setSuccess('게시글을 작성 중입니다...');
 
     try {
-      let mediaUrl = null;
-      let mediaType = 'none';
+      let mediaUrls = [];
+      let types = [];
 
       // 파일이 있으면 Firebase Storage에 업로드
-      if (file) {
+      if (files.length > 0) {
         setSuccess('파일을 업로드 중입니다...');
-        const fileName = `${Date.now()}-${file.name}`;
-        mediaUrl = await fileService.uploadImage(file, fileName);
-        mediaType = file.type.startsWith('video/') ? 'video' : 'image';
+        for (const file of files) {
+          const fileName = `${Date.now()}-${file.name}`;
+          const url = await fileService.uploadImage(file, fileName);
+          mediaUrls.push(url);
+          types.push(file.type.startsWith('video/') ? 'video' : 'image');
+        }
         setSuccess('파일 업로드 완료! 게시글을 작성 중입니다...');
       }
 
@@ -269,8 +273,8 @@ const Write = ({ userId }) => {
         author: isAnonymous ? '익명' : author.trim(),
         hiddenUserId: userId,
         link: link.trim() || '',
-        mediaUrl,
-        mediaType,
+        mediaUrls,
+        mediaTypes: types,
         likes: 0,
         likedUsers: [],
         comments: []
@@ -399,26 +403,29 @@ const Write = ({ userId }) => {
           <Input
             type="file"
             accept="image/*,video/*"
+            multiple
             onChange={handleFileChange}
-            style={{ 
-              fontSize: '16px', // 모바일에서 확대 방지
-              padding: '12px',
-              border: '2px dashed #ccc',
-              borderRadius: '8px',
-              backgroundColor: '#f9f9f9'
-            }}
+            style={{ fontSize: '16px', padding: '12px', border: '2px dashed #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}
           />
           <div style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
             📱 모바일에서는 카메라로 직접 촬영하거나 갤러리에서 선택할 수 있습니다
           </div>
-          {file && (
-            <FileInfo>
-              파일명: {file.name} | 크기: {(file.size / (1024 * 1024)).toFixed(2)}MB
-              <br />
-              타입: {file.type} | 마지막 수정: {new Date(file.lastModified).toLocaleString()}
-              <br />
-              <strong style={{ color: '#28a745' }}>✅ 업로드 준비 완료!</strong>
-            </FileInfo>
+          {files.length > 0 && (
+            <PreviewContainer>
+              {files.map((file, idx) => (
+                <div key={idx} style={{ marginBottom: 8 }}>
+                  {mediaTypes[idx] === 'image' ? (
+                    <ImagePreview src={URL.createObjectURL(file)} alt="미리보기" />
+                  ) : (
+                    <VideoPreview src={URL.createObjectURL(file)} controls />
+                  )}
+                  <FileInfo>
+                    파일명: {file.name} | 크기: {(file.size / (1024 * 1024)).toFixed(2)}MB
+                    <button type="button" onClick={() => handleRemoveFile(idx)} style={{ marginLeft: 8, color: '#dc3545', border: 'none', background: 'none', cursor: 'pointer' }}>삭제</button>
+                  </FileInfo>
+                </div>
+              ))}
+            </PreviewContainer>
           )}
         </FormGroup>
 

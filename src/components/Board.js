@@ -177,9 +177,9 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts, on
           <PostItem key={post.id || post._id} $isPinned={post.isPinned}>
             <PostHeader>
               <HeaderLeft>
-                <CategoryTag>{categoryMap[post.category] || post.category}</CategoryTag>
+              <CategoryTag>{categoryMap[post.category] || post.category}</CategoryTag>
                 {post.isPinned && <PinIcon>📌</PinIcon>}
-                <Title onClick={() => handlePostClick(post.id || post._id)}>{post.title}</Title>
+              <Title onClick={() => handlePostClick(post.id || post._id)}>{post.title}</Title>
               </HeaderLeft>
               {isAdmin && (
                 <PinButton onClick={() => onTogglePin(post.id || post._id)}>
@@ -531,4 +531,4 @@ const Pagination = styled.div`
   }
 `;
 
-export default Board;
+export default Board; 
