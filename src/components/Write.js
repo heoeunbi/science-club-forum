@@ -216,23 +216,44 @@ const Write = ({ userId }) => {
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    const validFiles = [];
-    const validTypes = [];
+    const newFiles = [];
+    const newTypes = [];
+
     for (const file of selectedFiles) {
+      // 중복 체크: 파일명, 크기, lastModified 모두 같으면 중복으로 간주
+      const isDuplicate = files.some(
+        f => f.name === file.name && f.size === file.size && f.lastModified === file.lastModified
+      );
+      if (isDuplicate) continue;
+
       if (file.size > VALIDATION.FILE_SIZE_MAX) continue;
       if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
-      validFiles.push(file);
-      validTypes.push(file.type.startsWith('video/') ? 'video' : 'image');
+      newFiles.push(file);
+      newTypes.push(file.type.startsWith('video/') ? 'video' : 'image');
     }
-    setFiles(validFiles);
-    setMediaTypes(validTypes);
+
+    setFiles(prev => [...prev, ...newFiles]);
+    setMediaTypes(prev => [...prev, ...newTypes]);
     setError('');
-    setSuccess(validFiles.length ? '파일이 성공적으로 선택되었습니다.' : '');
+    setSuccess(newFiles.length ? '파일이 성공적으로 추가되었습니다.' : '');
   };
 
   const handleRemoveFile = (idx) => {
     setFiles(files => files.filter((_, i) => i !== idx));
     setMediaTypes(types => types.filter((_, i) => i !== idx));
+  };
+
+  const moveFile = (idx, direction) => {
+    const newFiles = [...files];
+    const newTypes = [...mediaTypes];
+    const targetIdx = idx + direction;
+    if (targetIdx < 0 || targetIdx >= files.length) return;
+
+    [newFiles[idx], newFiles[targetIdx]] = [newFiles[targetIdx], newFiles[idx]];
+    [newTypes[idx], newTypes[targetIdx]] = [newTypes[targetIdx], newTypes[idx]];
+
+    setFiles(newFiles);
+    setMediaTypes(newTypes);
   };
 
   const handleSubmit = async (e) => {
@@ -422,6 +443,8 @@ const Write = ({ userId }) => {
                   <FileInfo>
                     파일명: {file.name} | 크기: {(file.size / (1024 * 1024)).toFixed(2)}MB
                     <button type="button" onClick={() => handleRemoveFile(idx)} style={{ marginLeft: 8, color: '#dc3545', border: 'none', background: 'none', cursor: 'pointer' }}>삭제</button>
+                    <button type="button" onClick={() => moveFile(idx, -1)} disabled={idx === 0} style={{ marginLeft: 8 }}>▲</button>
+                    <button type="button" onClick={() => moveFile(idx, 1)} disabled={idx === files.length - 1}>▼</button>
                   </FileInfo>
                 </div>
               ))}
