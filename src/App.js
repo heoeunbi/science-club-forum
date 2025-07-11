@@ -21,7 +21,7 @@ const App = () => {
 
   // 좋아요한 게시글 목록 계산
   const likedPosts = posts
-    .filter(post => post.likedUsers && post.likedUsers.includes(userId))
+    .filter(post => post.likedUserIds && post.likedUserIds.includes(userId))
     .map(post => post.id);
 
   useEffect(() => {
