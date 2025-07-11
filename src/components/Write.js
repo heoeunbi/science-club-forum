@@ -300,7 +300,7 @@ const Write = ({ userId }) => {
         mediaUrls,
         mediaTypes: types,
         likes: 0,
-        likedUserIds: [],
+        likedUsers: [],
         comments: []
       };
 
