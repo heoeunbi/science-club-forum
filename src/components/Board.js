@@ -218,6 +218,9 @@ const Board = ({ posts, likedPosts, onLike, onAddComment, userId, fetchPosts, on
             </PostFooter>
 
             <CommentSection>
+              <span style={{ color: 'red', fontSize: '0.95em', fontWeight: 'normal', marginBottom: 4, display: 'inline-block' }}>
+                *댓글달 때 규칙: 꼭 발언자(질문자)의 말을 간단히 요약, 재진술한 후 자신의 의견이나 반박을 달아 주세요!
+              </span>
               <CommentForm onSubmit={(e) => handleCommentSubmit(e, post.id || post._id)}>
                 <CommentInput
                   value={(commentInputs[post.id || post._id]?.text) || ''}
