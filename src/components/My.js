@@ -7,8 +7,8 @@ const My = ({ posts, likedPosts, userId }) => {
   // 내가 쓴 글: author가 userId이거나, token이 내 토큰과 일치하는 글도 포함
   const savedTokens = JSON.parse(localStorage.getItem('postTokens') || '{}');
   const myPosts = posts.filter(post => post.hiddenUserId === userId);
-  // 내가 좋아요한 글: 각 글의 likedUserIds에 내 userId가 포함되어 있는지로 판별
-  const likedPostsList = posts.filter(post => Array.isArray(post.likedUserIds) && post.likedUserIds.includes(userId));
+  // 내가 좋아요한 글: 각 글의 likedUsers에 내 userId가 포함되어 있는지로 판별
+  const likedPostsList = posts.filter(post => Array.isArray(post.likedUsers) && post.likedUsers.includes(userId));
   // 내가 쓴 댓글 모으기
   const myComments = [];
   posts.forEach(post => {
