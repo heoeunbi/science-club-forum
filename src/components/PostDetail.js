@@ -550,10 +550,12 @@ const PostDetail = ({ posts, onDelete, onEdit, onAddComment, onEditComment, onDe
           </LikeButton>
 
           <CommentSection>
-            <h3 style={{ display: 'inline-block', marginRight: 8 }}>댓글</h3>
-            <span style={{ color: 'red', fontSize: '0.95em', fontWeight: 'normal', verticalAlign: 'middle' }}>
-              *댓글달 때 규칙: 꼭 발언자(질문자)의 말을 간단히 요약, 재진술한 후 자신의 의견이나 반박을 달아 주세요!
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 0 }}>
+              <h3 style={{ display: 'inline-block', marginRight: 8, marginBottom: 0 }}>댓글</h3>
+              <span style={{ color: 'red', fontSize: '0.95em', fontWeight: 'normal', position: 'relative', top: '-2px' }}>
+                *댓글달 때 규칙: 꼭 발언자(질문자)의 말을 간단히 요약, 재진술한 후 자신의 의견이나 반박을 달아 주세요!
+              </span>
+            </div>
             <CommentForm onSubmit={handleCommentSubmit}>
               <TextArea
                 value={comment}
