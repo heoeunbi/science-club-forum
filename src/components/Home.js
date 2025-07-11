@@ -43,8 +43,8 @@ const Home = ({ posts }) => {
   return (
     <HomeContainer>
       <HeroSection>
-        <h1>수학과학 동아리 포럼</h1>
-        <p>수학과 과학에 대한 다양한 주제를 나누고 토론하는 공간입니다.</p>
+        <h1>LAB404</h1>
+        <p>다양한 주제에 대해 소통하고 경청하는 공간입니다.</p>
         <TutorialButton onClick={() => navigate('/tutorial')}>
           🎓 튜토리얼 보기
         </TutorialButton>
