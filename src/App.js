@@ -147,14 +147,15 @@ const App = () => {
                 <NavLink to="/admin">관리자 패널</NavLink>
               </>
             )}
+            <div style={{ flex: 1 }} />
             <input
               type="text"
               placeholder="게시글 검색..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              style={{ marginLeft: 16, padding: '6px 12px', borderRadius: 4, border: '1px solid #ccc', fontSize: '1rem', minWidth: 180 }}
+              style={{ marginRight: 16, padding: '6px 12px', borderRadius: 4, border: '1px solid #ccc', fontSize: '1rem', minWidth: 180 }}
             />
-            <button onClick={handleLogout} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'white', fontWeight: 500, cursor: 'pointer' }}>로그아웃</button>
+            <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'white', fontWeight: 500, cursor: 'pointer' }}>로그아웃</button>
           </Nav>
 
           <MainContent>
