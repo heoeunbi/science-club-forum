@@ -18,11 +18,22 @@ const App = () => {
   const [posts, setPosts] = useState([]);
   const [userId, setUserId] = useState(localStorage.getItem('userId') || '');
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem('isAdmin') === 'true');
+  const [search, setSearch] = useState('');
 
   // 좋아요한 게시글 목록 계산
   const likedPosts = posts
     .filter(post => post.likedUsers && post.likedUsers.includes(userId))
     .map(post => post.id);
+
+  const filteredPosts = posts.filter(post => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return true;
+    return (
+      (post.title && post.title.toLowerCase().includes(keyword)) ||
+      (post.content && post.content.toLowerCase().includes(keyword)) ||
+      (post.author && post.author.toLowerCase().includes(keyword))
+    );
+  });
 
   useEffect(() => {
     fetchPosts();
@@ -136,17 +147,24 @@ const App = () => {
                 <NavLink to="/admin">관리자 패널</NavLink>
               </>
             )}
+            <input
+              type="text"
+              placeholder="게시글 검색..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ marginLeft: 16, padding: '6px 12px', borderRadius: 4, border: '1px solid #ccc', fontSize: '1rem', minWidth: 180 }}
+            />
             <button onClick={handleLogout} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'white', fontWeight: 500, cursor: 'pointer' }}>로그아웃</button>
           </Nav>
 
           <MainContent>
             <Routes>
-              <Route path="/" element={<Home posts={posts} userId={userId} />} />
+              <Route path="/" element={<Home posts={filteredPosts} userId={userId} />} />
               <Route 
                 path="/board" 
                 element={
                   <Board 
-                    posts={posts} 
+                    posts={filteredPosts} 
                     likedPosts={likedPosts} 
                     onLike={handleLike}
                     onAddComment={handleAddComment}
@@ -161,6 +179,7 @@ const App = () => {
                 path="/write" 
                 element={
                   <Write 
+                    posts={filteredPosts}
                     onAddPost={handleAddPost}
                     userId={userId}
                   />
@@ -170,7 +189,7 @@ const App = () => {
                 path="/post/:id" 
                 element={
                   <PostDetail 
-                    posts={posts}
+                    posts={filteredPosts}
                     onDelete={handleDeletePost}
                     onEdit={handleEditPost}
                     onAddComment={handleAddComment}
@@ -187,20 +206,20 @@ const App = () => {
               <Route 
                 path="/my" 
                 element={
-                  <My posts={posts} likedPosts={likedPosts} userId={userId} />
+                  <My posts={filteredPosts} likedPosts={likedPosts} userId={userId} />
                 } 
               />
               <Route 
                 path="/tutorial" 
-                element={<Tutorial />} 
+                element={<Tutorial posts={filteredPosts} />} 
               />
               <Route 
                 path="/admin" 
-                element={<AdminPanel userId={userId} isAdmin={isAdmin} />} 
+                element={<AdminPanel posts={filteredPosts} userId={userId} isAdmin={isAdmin} />} 
               />
               <Route 
                 path="/profile" 
-                element={<Profile userId={userId} isAdmin={isAdmin} setUserId={setUserId} />} 
+                element={<Profile posts={filteredPosts} userId={userId} isAdmin={isAdmin} setUserId={setUserId} />} 
               />
             </Routes>
           </MainContent>
