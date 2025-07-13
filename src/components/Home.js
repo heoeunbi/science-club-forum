@@ -44,7 +44,7 @@ const Home = ({ posts }) => {
     <HomeContainer>
       <HeroSection>
         <h1>LAB404</h1>
-        <p>다양한 주제에 대해 소통하고 경청하는 공간입니다.</p>
+        <p>다양한 주제에 대해 소통하고 경청한 후 피드백 할 수 있는 공간입니다.</p>
         <TutorialButton onClick={() => navigate('/tutorial')}>
           🎓 튜토리얼 보기
         </TutorialButton>
